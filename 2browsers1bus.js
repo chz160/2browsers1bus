@@ -1,8 +1,7 @@
 var tbob = {};
-
 (function () {
     var self = this;
-    var _serviceBusKey = "acr.servicebus.";
+    var _serviceBusKey = "tbob.servicebus.";
     var _listeningForList = [];
     var _heardEvents = [];
     var _listening = false;
@@ -21,13 +20,12 @@ var tbob = {};
         var key = getKeyForEventName(eventName);
         var eventTypeCollection = [];
         var json = localStorage.getItem(key);
-        if (json != null && json != 'undefined') 
-        {
+        if (typeof (json) != 'undefined' && json != null) {
             eventTypeCollection = JSON.parse(json);
         }
         var storeObject = [arg, timestamp()];
         eventTypeCollection.push(storeObject);
-        var json = JSON.stringify(eventTypeCollection)
+        json = JSON.stringify(eventTypeCollection);
         localStorage.setItem(key, json);
     }
     function listen() {
@@ -36,15 +34,15 @@ var tbob = {};
             var eventName = _listeningForList[i][0];
             var callback = _listeningForList[i][1];
             var json = localStorage.getItem(eventName);
-            if (json != null && json != 'undefined') {
+            if (typeof (json) != 'undefined' && json != null) {
                 var eventTypeCollection = JSON.parse(json);
-                for (ii in eventTypeCollection) {
+                for (var ii in eventTypeCollection) {
                     var eventStamp = eventTypeCollection[ii][1];
                     if ($.inArray(eventStamp, _heardEvents) > -1) {
                         continue;
                     }
-                    args = eventTypeCollection[ii][0];
-                    if (callback != null || callback != 'undefined') {
+                    var args = eventTypeCollection[ii][0];
+                    if (typeof (callback) != 'undefined' && callback != null) {
                         callback(args);
                     }
                     if (_heardEvents.length >= 100) {
@@ -55,11 +53,11 @@ var tbob = {};
             }
             storageCleanup(eventName);
         }
-        setTimeout(function () { listen(eventName) }, _poleDelay);
+        setTimeout(function () { listen(eventName); }, _poleDelay);
     }
     function storageCleanup(key) {
         var json = localStorage.getItem(key);
-        if (json != null && json != 'undefined') {
+        if (typeof (json) != 'undefined' && json != null) {
             var eventTypeCollection = JSON.parse(json);
             var indexesToRemove = [];
             for (i in eventTypeCollection) {
@@ -73,8 +71,8 @@ var tbob = {};
             if (eventTypeCollection.length == 0) {
                 localStorage.removeItem(key);
             } else {
-                var json = JSON.stringify(eventTypeCollection)
-                localStorage.setItem(key, json);
+                var eventTypeCollectionJson = JSON.stringify(eventTypeCollection);
+                localStorage.setItem(key, eventTypeCollectionJson);
             }
         }
     }
@@ -82,7 +80,7 @@ var tbob = {};
         return _serviceBusKey + eventName;
     }
     var timestamp = (function () {
-        return function() {
+        return function () {
             return +new Date();
         }
     })();
