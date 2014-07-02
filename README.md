@@ -5,8 +5,8 @@
 
 
 ### Dependencies:
-[jQuery](http://jquery.com/download/)
-[JSON-js](https://github.com/douglascrockford/JSON-js)
+1. [jQuery](http://jquery.com/download/)
+2. [JSON-js](https://github.com/douglascrockford/JSON-js)
 
 
 ### Methods:
