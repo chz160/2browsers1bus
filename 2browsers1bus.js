@@ -1,4 +1,4 @@
-var bwsb = {};
+var tbob = {};
 
 (function () {
     var self = this;
@@ -86,4 +86,4 @@ var bwsb = {};
             return +new Date();
         }
     })();
-}).apply(bwsb);
+}).apply(tbob);
