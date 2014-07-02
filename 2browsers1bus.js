@@ -1,5 +1,4 @@
-var acr = {};
-acr.serviceBus = {};
+var bwsb = {};
 
 (function () {
     var self = this;
@@ -87,4 +86,4 @@ acr.serviceBus = {};
             return +new Date();
         }
     })();
-}).apply(acr.serviceBus);
+}).apply(bwsb);
