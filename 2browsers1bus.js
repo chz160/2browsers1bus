@@ -17,7 +17,7 @@ var tbob = {};
             listen();
         }
     }
-    this.fireServiceBusEvent = function (eventName, arg) {
+    this.fireEvent = function (eventName, arg) {
         var key = getKeyForEventName(eventName);
         var eventTypeCollection = [];
         var json = localStorage.getItem(key);
