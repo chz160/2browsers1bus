@@ -20,7 +20,6 @@ When an event is fired it can contain a JavaScript object of any type, which TBO
 
 ### Methods:
 **fireEvent(eventName, param)**
-Usage:
 ```javascript
 var foo = {
     bar: "chocolate ice cream in my mouth!!!"
@@ -29,7 +28,6 @@ tbob.fireEvent("AlertAboutSomething", foo);
 ```
 
 **listenFor(eventName, callback(param))**
-Usage:
 ```
 tbob.listenFor("AlertAboutSomething", function(param){
     alert(param.bar);
