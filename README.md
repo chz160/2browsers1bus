@@ -19,7 +19,7 @@ When an event is fired it can contain a JavaScript object of any type, which TBO
 
 
 ### Methods:
-**fireEvent(eventName, params)**
+**fireEvent(eventName, param)**
 Usage:
 ```javascript
 var foo = {
@@ -28,10 +28,10 @@ var foo = {
 tbob.fireEvent("AlertAboutSomething", foo);
 ```
 
-**listenFor(eventName, callback(args))**
+**listenFor(eventName, callback(param))**
 Usage:
 ```
-tbob.listenFor("AlertAboutSomething", function(args){
-    alert(args.bar);
+tbob.listenFor("AlertAboutSomething", function(param){
+    alert(param.bar);
 })
 ```
