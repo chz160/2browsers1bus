@@ -10,7 +10,7 @@ TBOB has two parts, Events and Listeners. Let's say that Browser 1 (B1) wants to
 
 Events can be fired from one browser and picked up by any number of other browsers. This is done by delaying the removal of events from the bus for a short time and by the listeners keeping track of what events they have already seen so they will not retrieve them more than once.
 
-When an event is fired it can contain a JavaScript object of any type, which TBOB serializes to JSON before placing it on the bus. Once the event is retrieved on the other side the JSON is desterilized back into its original form.
+When an event is fired it can contain a JavaScript object of any type, which TBOB serializes to JSON before placing it on the bus. Once the event is retrieved by the reciving browser the JSON is desterilized back into its original form.
 
 
 ### Dependencies:
