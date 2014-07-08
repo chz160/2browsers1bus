@@ -3,6 +3,7 @@ var tbob = {};
     var self = this;
     var _serviceBusKey = "tbob.servicebus.";
     var _listeningForList = [];
+    var _firedEvents = [];
     var _heardEvents = [];
     var _listening = false;
     var _poleDelay = 250;
@@ -16,17 +17,24 @@ var tbob = {};
             listen();
         }
     }
-    this.fireEvent = function (eventName, arg) {
+    this.fireEvent = function (eventName, arg, single) {
         var key = getKeyForEventName(eventName);
         var eventTypeCollection = [];
-        var json = localStorage.getItem(key);
-        if (typeof (json) != 'undefined' && json != null) {
-            eventTypeCollection = JSON.parse(json);
+        if (typeof (single) == 'undefined' || single == null || single === false) {
+            var json = localStorage.getItem(key);
+            if (typeof (json) != 'undefined' && json != null) {
+                eventTypeCollection = JSON.parse(json);
+            }
         }
-        var storeObject = [arg, timestamp()];
+        var eventStamp = timestamp();
+        var storeObject = [arg, eventStamp];
         eventTypeCollection.push(storeObject);
         json = JSON.stringify(eventTypeCollection);
         localStorage.setItem(key, json);
+        if (_firedEvents.length >= 100) {
+            _firedEvents.shift();
+        }
+        _firedEvents.push([key, eventStamp]);
     }
     function listen() {
         if (_listening === false) _listening = true;
@@ -53,7 +61,7 @@ var tbob = {};
             }
             storageCleanup(eventName);
         }
-        setTimeout(function () { listen(eventName); }, _poleDelay);
+        setTimeout(function () { listen(); }, _poleDelay);
     }
     function storageCleanup(key) {
         var json = localStorage.getItem(key);
