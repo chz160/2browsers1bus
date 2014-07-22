@@ -5,16 +5,11 @@ var tbob = {};
     var _listeningForList = [];
     var _firedEvents = [];
     var _heardEvents = [];
-    var _listening = false;
-    var _poleDelay = 250;
     var _cleanupDelay = 250;
     this.listenFor = function (eventName, callback) {
         var key = getKeyForEventName(eventName);
         if ($.inArray(key, _listeningForList) == -1) {
             _listeningForList[key] = [key, callback];
-        }
-        if (_listening === false) {
-            listen();
         }
     }
     this.fireEvent = function (eventName, arg, single) {
@@ -36,32 +31,32 @@ var tbob = {};
         }
         _firedEvents.push([key, eventStamp]);
     }
-    function listen() {
-        if (_listening === false) _listening = true;
+    function listen(e) {
         for (i in _listeningForList) {
             var eventName = _listeningForList[i][0];
             var callback = _listeningForList[i][1];
-            var json = localStorage.getItem(eventName);
-            if (typeof (json) != 'undefined' && json != null) {
-                var eventTypeCollection = JSON.parse(json);
-                for (var ii in eventTypeCollection) {
-                    var eventStamp = eventTypeCollection[ii][1];
-                    if ($.inArray(eventStamp, _heardEvents) > -1) {
-                        continue;
+            if (e.key == eventName) {
+                var json = e.newValue;
+                if (typeof (json) != 'undefined' && json != null && json != "") {
+                    var eventTypeCollection = JSON.parse(json);
+                    for (var ii in eventTypeCollection) {
+                        var eventStamp = eventTypeCollection[ii][1];
+                        if ($.inArray(eventStamp, _heardEvents) > -1) {
+                            continue;
+                        }
+                        var args = eventTypeCollection[ii][0];
+                        if (typeof (callback) != 'undefined' && callback != null) {
+                            callback(args);
+                        }
+                        if (_heardEvents.length >= 100) {
+                            _heardEvents.shift();
+                        }
+                        _heardEvents.push(eventStamp);
                     }
-                    var args = eventTypeCollection[ii][0];
-                    if (typeof (callback) != 'undefined' && callback != null) {
-                        callback(args);
-                    }
-                    if (_heardEvents.length >= 100) {
-                        _heardEvents.shift();
-                    }
-                    _heardEvents.push(eventStamp);
+                    storageCleanup(eventName);
                 }
             }
-            storageCleanup(eventName);
         }
-        setTimeout(function () { listen(); }, _poleDelay);
     }
     function storageCleanup(key) {
         var json = localStorage.getItem(key);
@@ -92,4 +87,13 @@ var tbob = {};
             return +new Date();
         }
     })();
+    if (window.addEventListener) {
+        window.addEventListener("storage", onHandleStorage, false);
+    } else {
+        window.attachEvent("onstorage", onHandleStorage);
+    };
+    function onHandleStorage(e) {
+        if (!e) { e = window.event; }
+        listen(e);
+    }
 }).apply(tbob);
