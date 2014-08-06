@@ -47,6 +47,17 @@ var tbob = {};
             logError(e);
         }
     }
+    self.cleanUpStorage = function () {
+        try {
+            for (var i = 0; i < localStorage.length; i++) {
+                if (localStorage.key(i).indexOf(_serviceBusKey) == 0) {
+                    localStorage.removeItem(localStorage.key(i));
+                }
+            }
+        } catch (e) {
+            logError(e);
+        }
+    }
     function listen(event) {
         try {
             for (i in _listeningForList) {
