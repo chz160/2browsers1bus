@@ -2,7 +2,7 @@ var tbob = {};
 (function () {
     var self = this;
     var _serviceBusKey = "tbob.servicebus.";
-    var _listeningForList = [];
+    var _listeningForList = {};
     //var _firedEvents = [];
     var _heardEvents = [];
     var _cleanupDelay = 250;
@@ -23,10 +23,10 @@ var tbob = {};
         try {
             var key = getKeyForEventName(eventName);
             var eventTypeCollection = [];
-            if (typeof (single) == 'undefined' || single == null || single === false) {
-                var json = localStorage.getItem(key);
-                if (typeof (json) != 'undefined' && json != null) {
-                    eventTypeCollection = JSON.parse(json);
+            if (typeof (single) == "undefined" || single == null || single === false) {
+                var jsonFromStore = localStorage.getItem(key);
+                if (typeof (jsonFromStore) != "undefined" && jsonFromStore != null) {
+                    eventTypeCollection = JSON.parse(jsonFromStore);
                 }
             }
             var eventStamp = timestamp();
@@ -36,8 +36,8 @@ var tbob = {};
                 guid: guid()
             };
             eventTypeCollection.push(storeObject);
-            json = JSON.stringify(eventTypeCollection);
-            localStorage.setItem(key, json);
+            var jsonToStore = JSON.stringify(eventTypeCollection);
+            localStorage.setItem(key, jsonToStore);
             //TODO: could be useful for tracking ones own events
             //if (_firedEvents.length >= 100) {
             //    _firedEvents.shift();
@@ -49,10 +49,14 @@ var tbob = {};
     }
     self.cleanUpStorage = function () {
         try {
-            for (var i = 0; i < localStorage.length; i++) {
-                if (localStorage.key(i).indexOf(_serviceBusKey) == 0) {
-                    localStorage.removeItem(localStorage.key(i));
+            var keys = [];
+            for (var key in localStorage) {
+                if (key.indexOf(_serviceBusKey) === 0) {
+                    keys.push(key);
                 }
+            }
+            for (var i = 0; i < keys.length; i++) {
+                localStorage.removeItem(keys[i]);
             }
         } catch (e) {
             logError(e);
@@ -60,28 +64,30 @@ var tbob = {};
     }
     function listen(event) {
         try {
-            for (i in _listeningForList) {
-                var eventName = _listeningForList[i].key;
-                var callback = _listeningForList[i].callback;
-                if (event.key == eventName) {
-                    var json = event.newValue;
-                    if (typeof (json) != 'undefined' && json != null && json != "") {
-                        var eventTypeCollection = JSON.parse(json);
-                        for (var ii in eventTypeCollection) {
-                            var eventStamp = eventTypeCollection[ii].eventTimeStamp;
-                            if ($.inArray(eventStamp, _heardEvents) > -1) {
-                                continue;
+            for (var prop in _listeningForList) {
+                if (_listeningForList.hasOwnProperty(prop)) {
+                    var eventName = _listeningForList[prop].key;
+                    var callback = _listeningForList[prop].callback;
+                    if (event.key === eventName) {
+                        var json = event.newValue;
+                        if (typeof (json) != "undefined" && json != null && json !== "") {
+                            var eventTypeCollection = JSON.parse(json);
+                            for (var ii = 0; ii < eventTypeCollection.length; ii++) {
+                                var eventStamp = eventTypeCollection[ii].eventTimeStamp;
+                                if ($.inArray(eventStamp, _heardEvents) > -1) {
+                                    continue;
+                                }
+                                var args = eventTypeCollection[ii].data;
+                                if (typeof (callback) != "undefined" && callback != null) {
+                                    callback(args);
+                                }
+                                if (_heardEvents.length >= 100) {
+                                    _heardEvents.shift();
+                                }
+                                _heardEvents.push(eventStamp);
                             }
-                            var args = eventTypeCollection[ii].data;
-                            if (typeof (callback) != 'undefined' && callback != null) {
-                                callback(args);
-                            }
-                            if (_heardEvents.length >= 100) {
-                                _heardEvents.shift();
-                            }
-                            _heardEvents.push(eventStamp);
+                            storageCleanup(eventName);
                         }
-                        storageCleanup(eventName);
                     }
                 }
             }
@@ -92,18 +98,18 @@ var tbob = {};
     function storageCleanup(key) {
         try {
             var json = localStorage.getItem(key);
-            if (typeof (json) != 'undefined' && json != null) {
+            if (typeof (json) != "undefined" && json != null) {
                 var eventTypeCollection = JSON.parse(json);
                 var indexesToRemove = [];
-                for (i in eventTypeCollection) {
+                for (var i = 0; i < eventTypeCollection.length; i++) {
                     if (timestamp() - eventTypeCollection[i].eventTimeStamp > _cleanupDelay) {
                         indexesToRemove.push(i);
                     }
                 }
-                for (i in indexesToRemove) {
-                    eventTypeCollection.splice(i, 1);
+                for (var ii = 0; ii < indexesToRemove.length; ii++) {
+                    eventTypeCollection.splice(ii, 1);
                 }
-                if (eventTypeCollection.length == 0) {
+                if (eventTypeCollection.length === 0) {
                     localStorage.removeItem(key);
                 } else {
                     var eventTypeCollectionJson = JSON.stringify(eventTypeCollection);
@@ -117,11 +123,9 @@ var tbob = {};
     function getKeyForEventName(eventName) {
         return _serviceBusKey + eventName;
     }
-    var timestamp = (function () {
-        return function () {
-            return +new Date();
-        }
-    })();
+    function timestamp() {
+        return +new Date();
+    };
     var guid = (function () {
         function s4() {
             return Math.floor((1 + Math.random()) * 0x10000)
@@ -129,8 +133,8 @@ var tbob = {};
                        .substring(1);
         }
         return function () {
-            return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-                   s4() + '-' + s4() + s4() + s4();
+            return s4() + s4() + "-" + s4() + "-" + s4() + "-" +
+                   s4() + "-" + s4() + s4() + s4();
         };
     })();
     if (window.addEventListener) {
