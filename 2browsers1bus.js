@@ -1,19 +1,20 @@
-var tbob = {};
+let tbob = {};
 (function () {
-    var self = this;
-    var _serviceBusKey = "tbob.servicebus.";
-    var _listeningForList = {};
+    const self = this;
+    const _serviceBusKey = "tbob.servicebus.";
+    const _listeningForList = {};
     //var _firedEvents = [];
-    var _heardEvents = [];
-    var _cleanupDelay = 250;
+    const _heardEvents = [];
+    const _cleanupDelay = 250;
+    
     self.exceptionHandler = null;
     self.listenFor = function (eventName, callback) {
         try {
-            var key = getKeyForEventName(eventName);
+            const key = getKeyForEventName(eventName);
             _listeningForList[key] = {
                 key: key,
                 callback: callback,
-                guid: guid()
+                guid: tbob.guid.GenerateGuid()
             };
         } catch (e) {
             logError(e);
@@ -21,22 +22,22 @@ var tbob = {};
     }
     self.fireEvent = function (eventName, arg, single) {
         try {
-            var key = getKeyForEventName(eventName);
-            var eventTypeCollection = [];
+            const key = getKeyForEventName(eventName);
+            let eventTypeCollection = [];
             if (typeof (single) == "undefined" || single == null || single === false) {
-                var jsonFromStore = localStorage.getItem(key);
+                const jsonFromStore = localStorage.getItem(key);
                 if (typeof (jsonFromStore) != "undefined" && jsonFromStore != null) {
                     eventTypeCollection = JSON.parse(jsonFromStore);
                 }
             }
-            var eventStamp = timestamp();
-            var storeObject = {
+            const eventStamp = timestamp();
+            const storeObject = {
                 data: arg,
                 eventTimeStamp: eventStamp,
-                guid: guid()
+                guid: tbob.guid.GenerateGuid()
             };
             eventTypeCollection.push(storeObject);
-            var jsonToStore = JSON.stringify(eventTypeCollection);
+            const jsonToStore = JSON.stringify(eventTypeCollection);
             localStorage.setItem(key, jsonToStore);
             //TODO: could be useful for tracking ones own events
             //if (_firedEvents.length >= 100) {
@@ -49,13 +50,13 @@ var tbob = {};
     }
     self.cleanUpStorage = function () {
         try {
-            var keys = [];
-            for (var key in localStorage) {
+            const keys = [];
+            for (let key in localStorage) {
                 if (key.indexOf(_serviceBusKey) === 0) {
                     keys.push(key);
                 }
             }
-            for (var i = 0; i < keys.length; i++) {
+            for (let i = 0; i < keys.length; i++) {
                 localStorage.removeItem(keys[i]);
             }
         } catch (e) {
@@ -64,20 +65,20 @@ var tbob = {};
     }
     function listen(event) {
         try {
-            for (var prop in _listeningForList) {
+            for (let prop in _listeningForList) {
                 if (_listeningForList.hasOwnProperty(prop)) {
-                    var eventName = _listeningForList[prop].key;
-                    var callback = _listeningForList[prop].callback;
+                    const eventName = _listeningForList[prop].key;
+                    const callback = _listeningForList[prop].callback;
                     if (event.key === eventName) {
-                        var json = event.newValue;
+                        const json = event.newValue;
                         if (typeof (json) != "undefined" && json != null && json !== "") {
-                            var eventTypeCollection = JSON.parse(json);
-                            for (var ii = 0; ii < eventTypeCollection.length; ii++) {
-                                var eventStamp = eventTypeCollection[ii].eventTimeStamp;
+                            const eventTypeCollection = JSON.parse(json);
+                            for (let ii = 0; ii < eventTypeCollection.length; ii++) {
+                                const eventStamp = eventTypeCollection[ii].eventTimeStamp;
                                 if ($.inArray(eventStamp, _heardEvents) > -1) {
                                     continue;
                                 }
-                                var args = eventTypeCollection[ii].data;
+                                const args = eventTypeCollection[ii].data;
                                 if (typeof (callback) != "undefined" && callback != null) {
                                     callback(args);
                                 }
@@ -97,22 +98,22 @@ var tbob = {};
     }
     function storageCleanup(key) {
         try {
-            var json = localStorage.getItem(key);
+            const json = localStorage.getItem(key);
             if (typeof (json) != "undefined" && json != null) {
-                var eventTypeCollection = JSON.parse(json);
-                var indexesToRemove = [];
-                for (var i = 0; i < eventTypeCollection.length; i++) {
+                const eventTypeCollection = JSON.parse(json);
+                const indexesToRemove = [];
+                for (let i = 0; i < eventTypeCollection.length; i++) {
                     if (timestamp() - eventTypeCollection[i].eventTimeStamp > _cleanupDelay) {
                         indexesToRemove.push(i);
                     }
                 }
-                for (var ii = 0; ii < indexesToRemove.length; ii++) {
+                for (let ii = 0; ii < indexesToRemove.length; ii++) {
                     eventTypeCollection.splice(ii, 1);
                 }
                 if (eventTypeCollection.length === 0) {
                     localStorage.removeItem(key);
                 } else {
-                    var eventTypeCollectionJson = JSON.stringify(eventTypeCollection);
+                    const eventTypeCollectionJson = JSON.stringify(eventTypeCollection);
                     localStorage.setItem(key, eventTypeCollectionJson);
                 }
             }
@@ -126,17 +127,6 @@ var tbob = {};
     function timestamp() {
         return +new Date();
     };
-    var guid = (function () {
-        function s4() {
-            return Math.floor((1 + Math.random()) * 0x10000)
-                       .toString(16)
-                       .substring(1);
-        }
-        return function () {
-            return s4() + s4() + "-" + s4() + "-" + s4() + "-" +
-                   s4() + "-" + s4() + s4() + s4();
-        };
-    })();
     if (window.addEventListener) {
         window.addEventListener("storage", onHandleStorage, false);
     } else {
@@ -155,3 +145,40 @@ var tbob = {};
         }
     }
 }).apply(tbob);
+
+tbob.guid = {};
+(function () {
+    const self = this;
+    var guid = (function () {
+        var lut = []; for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? "0" : "") + (i).toString(16); }
+        function generate() {
+            const d0 = randomizer();
+            const d1 = randomizer();
+            const d2 = randomizer();
+            const d3 = randomizer();
+            return lut[d0 & 0xff] + lut[d0 >> 8 & 0xff] + lut[d0 >> 16 & 0xff] + lut[d0 >> 24 & 0xff] + "-" +
+                lut[d1 & 0xff] + lut[d1 >> 8 & 0xff] + "-" + lut[d1 >> 16 & 0x0f | 0x40] + lut[d1 >> 24 & 0xff] + "-" +
+                lut[d2 & 0x3f | 0x80] + lut[d2 >> 8 & 0xff] + "-" + lut[d2 >> 16 & 0xff] + lut[d2 >> 24 & 0xff] +
+                lut[d3 & 0xff] + lut[d3 >> 8 & 0xff] + lut[d3 >> 16 & 0xff] + lut[d3 >> 24 & 0xff];
+        }
+        function randomizer() {
+            const crypto = window.crypto || window.msCrypto; // IE 11
+            if (crypto && crypto.getRandomValues) {
+                const result = new Uint8Array(5);
+                crypto.getRandomValues(result);
+                let number = "0.";
+                for (let i = 0; i < result.length; i++) {
+                    number = number + "" + result[i];
+                }
+                return Number(number) * 0x100000000 >>> 0;
+            }
+            return Math.random() * 0xffffffff >>> 0;
+        }
+        return function () {
+            return generate();
+        }
+    })();
+    self.GenerateGuid = function() {
+        return guid();
+    }
+}).apply(tbob.guid);
