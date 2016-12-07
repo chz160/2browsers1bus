@@ -12,8 +12,8 @@ const tbob = {};
         try {
             const key = getKeyForEventName(eventName);
             _listeningForList[key] = {
-                key,
-                callback,
+                key: key,
+                callback: callback,
                 guid: tbob.guid.GenerateGuid()
             };
         } catch (e) {
