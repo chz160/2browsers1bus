@@ -1,4 +1,4 @@
-let tbob = {};
+const tbob = {};
 (function () {
     const self = this;
     const _serviceBusKey = "tbob.servicebus.";
@@ -12,8 +12,8 @@ let tbob = {};
         try {
             const key = getKeyForEventName(eventName);
             _listeningForList[key] = {
-                key: key,
-                callback: callback,
+                key,
+                callback,
                 guid: tbob.guid.GenerateGuid()
             };
         } catch (e) {
@@ -24,9 +24,9 @@ let tbob = {};
         try {
             const key = getKeyForEventName(eventName);
             let eventTypeCollection = [];
-            if (typeof (single) == "undefined" || single == null || single === false) {
+            if (typeof single == "undefined" || single == null || single === false) {
                 const jsonFromStore = localStorage.getItem(key);
-                if (typeof (jsonFromStore) != "undefined" && jsonFromStore != null) {
+                if (typeof jsonFromStore != "undefined" && jsonFromStore != null) {
                     eventTypeCollection = JSON.parse(jsonFromStore);
                 }
             }
@@ -71,7 +71,7 @@ let tbob = {};
                     const callback = _listeningForList[prop].callback;
                     if (event.key === eventName) {
                         const json = event.newValue;
-                        if (typeof (json) != "undefined" && json != null && json !== "") {
+                        if (typeof json != "undefined" && json != null && json !== "") {
                             const eventTypeCollection = JSON.parse(json);
                             for (let ii = 0; ii < eventTypeCollection.length; ii++) {
                                 const eventStamp = eventTypeCollection[ii].eventTimeStamp;
@@ -79,7 +79,7 @@ let tbob = {};
                                     continue;
                                 }
                                 const args = eventTypeCollection[ii].data;
-                                if (typeof (callback) != "undefined" && callback != null) {
+                                if (typeof callback != "undefined" && callback != null) {
                                     callback(args);
                                 }
                                 if (_heardEvents.length >= 100) {
@@ -99,7 +99,7 @@ let tbob = {};
     function storageCleanup(key) {
         try {
             const json = localStorage.getItem(key);
-            if (typeof (json) != "undefined" && json != null) {
+            if (typeof json != "undefined" && json != null) {
                 const eventTypeCollection = JSON.parse(json);
                 const indexesToRemove = [];
                 for (let i = 0; i < eventTypeCollection.length; i++) {
@@ -126,12 +126,12 @@ let tbob = {};
     }
     function timestamp() {
         return +new Date();
-    };
+    }
     if (window.addEventListener) {
         window.addEventListener("storage", onHandleStorage, false);
     } else {
         window.attachEvent("onstorage", onHandleStorage);
-    };
+    }
     function onHandleStorage(event) {
         if (!event) { event = window.event; }
         listen(event);
@@ -149,8 +149,8 @@ let tbob = {};
 tbob.guid = {};
 (function () {
     const self = this;
-    var guid = (function () {
-        var lut = []; for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? "0" : "") + (i).toString(16); }
+    const guid = (function () {
+        const lut = []; for (let i = 0; i < 256; i++) { lut[i] = (i < 16 ? "0" : "") + (i).toString(16); }
         function generate() {
             const d0 = randomizer();
             const d1 = randomizer();
