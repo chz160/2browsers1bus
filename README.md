@@ -14,8 +14,7 @@ When an event is fired it can contain a JavaScript object of any type, which TBO
 
 
 ### Dependencies:
-1. [jQuery](http://jquery.com/download/)
-2. [JSON-js](https://github.com/douglascrockford/JSON-js)
+1. [JSON-js](https://github.com/douglascrockford/JSON-js)
 
 
 ### Methods:

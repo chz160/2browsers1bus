@@ -1,6 +1,6 @@
 {
     "name": "2browsers1bus",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "2browser1bus (TBOB) is a service bus for communicating between browser windows using the localStorage feature of modern browsers.",
     "homepage": "https://github.com/chz160/2browsers1bus",
     "author": "Noah Porch <noahporch@gmail.com> (https://github.com/chz160)",
@@ -21,5 +21,12 @@
     "license": "MIT",
     "devDependencies": {
         "typescript": "^4.6.4"
-    }
+    },
+    "scripts": {
+        "compile": "tsc -p ./src/ ",
+        "copyToRoot": "copy /y .\\src\\2browsers1bus.js .\\2browsers1bus.js",
+        "copyToDist": "copy /y .\\src\\2browsers1bus.js .\\dist\\2browsers1bus.js",
+        "copyTypeToRoot": "copy /y .\\src\\2browsers1bus.d.ts .\\2browsers1bus.d.ts",
+        "build": "npm run compile && npm run copyToRoot && npm run copyToDist && npm run copyTypeToRoot"
+      }
 }

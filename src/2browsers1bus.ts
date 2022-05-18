@@ -126,7 +126,7 @@ module tbob {
                                 const eventTypeCollection = JSON.parse(json);
                                 for (let ii = 0; ii < eventTypeCollection.length; ii++) {
                                     const eventStamp = eventTypeCollection[ii].eventTimeStamp;
-                                    if ($.inArray(eventStamp, this._heardEvents) > -1) {
+                                    if (this._heardEvents.indexOf(eventStamp) > -1) {
                                         continue;
                                     }
                                     const args = eventTypeCollection[ii].data;

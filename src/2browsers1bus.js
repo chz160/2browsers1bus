@@ -117,7 +117,7 @@ var tbob;
                                 var eventTypeCollection = JSON.parse(json);
                                 for (var ii = 0; ii < eventTypeCollection.length; ii++) {
                                     var eventStamp = eventTypeCollection[ii].eventTimeStamp;
-                                    if ($.inArray(eventStamp, this._heardEvents) > -1) {
+                                    if (this._heardEvents.indexOf(eventStamp) > -1) {
                                         continue;
                                     }
                                     var args = eventTypeCollection[ii].data;
