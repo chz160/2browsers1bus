@@ -1,23 +1,20 @@
 var tbob;
 (function (tbob) {
-    var serviceBus = (function () {
-        function serviceBus() {
-        }
-        serviceBus.getInstance = function () {
+    class serviceBus {
+        static getInstance() {
             if (this.instance == undefined) {
                 this.instance = new serviceBusBase();
             }
             return this.instance;
-        };
-        serviceBus.setExceptionHandlerCallback = function (callback) { this.getInstance().setExceptionHandlerCallback(callback); };
-        serviceBus.listenFor = function (eventName, callback) { this.getInstance().listenFor(eventName, callback); };
-        serviceBus.fireEvent = function (eventName, arg, single) { this.getInstance().fireEvent(eventName, arg, single); };
-        serviceBus.cleanUpStorage = function () { this.getInstance().cleanUpStorage(); };
-        return serviceBus;
-    }());
+        }
+        static setExceptionHandlerCallback(callback) { this.getInstance().setExceptionHandlerCallback(callback); }
+        static listenFor(eventName, callback) { this.getInstance().listenFor(eventName, callback); }
+        static fireEvent(eventName, arg, single) { this.getInstance().fireEvent(eventName, arg, single); }
+        static cleanUpStorage() { this.getInstance().cleanUpStorage(); }
+    }
     tbob.serviceBus = serviceBus;
-    var serviceBusBase = (function () {
-        function serviceBusBase() {
+    class serviceBusBase {
+        constructor() {
             this._serviceBusPrefix = "tbob.servicebus.";
             this._listeningForList = {};
             this._heardEvents = [];
@@ -25,34 +22,33 @@ var tbob;
             this._store = localStorage || null;
             this.init();
         }
-        serviceBusBase.prototype.init = function () {
-            var _this = this;
+        init() {
             if (window.addEventListener) {
-                window.addEventListener("storage", function (event) {
+                window.addEventListener("storage", (event) => {
                     if (!event) {
                         event = window.event;
                     }
-                    _this.listen(event);
+                    this.listen(event);
                 }, false);
             }
             else {
-                window.attachEvent("onstorage", function (event) {
+                window.attachEvent("onstorage", (event) => {
                     if (!event) {
                         event = window.event;
                     }
-                    _this.listen(event);
+                    this.listen(event);
                 });
             }
-        };
-        serviceBusBase.prototype.setExceptionHandlerCallback = function (callback) {
+        }
+        setExceptionHandlerCallback(callback) {
             this.exceptionHandler = callback;
-        };
-        serviceBusBase.prototype.handleException = function (e) {
+        }
+        handleException(e) {
             this.exceptionHandler(e);
-        };
-        serviceBusBase.prototype.listenFor = function (eventName, callback) {
+        }
+        listenFor(eventName, callback) {
             try {
-                var key = this.getKeyForEventName(eventName);
+                const key = this.getKeyForEventName(eventName);
                 this._listeningForList[key] = {
                     key: key,
                     callback: callback,
@@ -62,65 +58,65 @@ var tbob;
             catch (e) {
                 this.logError(e);
             }
-        };
-        serviceBusBase.prototype.fireEvent = function (eventName, arg, single) {
+        }
+        fireEvent(eventName, arg, single) {
             try {
-                var key = this.getKeyForEventName(eventName);
-                var eventTypeCollection = [];
+                const key = this.getKeyForEventName(eventName);
+                let eventTypeCollection = [];
                 if (typeof single == "undefined" || single == null || single === false) {
-                    var jsonFromStore = this._store.getItem(key);
+                    const jsonFromStore = this._store.getItem(key);
                     if (typeof jsonFromStore != "undefined" && jsonFromStore != null) {
                         eventTypeCollection = JSON.parse(jsonFromStore);
                     }
                 }
-                var eventStamp = this.timestamp();
-                var storeObject = {
+                const eventStamp = this.timestamp();
+                const storeObject = {
                     data: arg,
                     eventTimeStamp: eventStamp,
                     guid: this.newGuid()
                 };
                 eventTypeCollection.push(storeObject);
-                var jsonToStore = JSON.stringify(eventTypeCollection);
+                const jsonToStore = JSON.stringify(eventTypeCollection);
                 this._store.setItem(key, jsonToStore);
             }
             catch (e) {
                 this.logError(e);
             }
-        };
-        serviceBusBase.prototype.cleanUpStorage = function () {
+        }
+        cleanUpStorage() {
             try {
-                var keys = [];
-                for (var key in this._store) {
+                const keys = [];
+                for (let key in this._store) {
                     if (this._store.hasOwnProperty(key)) {
                         if (key.indexOf(this._serviceBusPrefix) === 0) {
                             keys.push(key);
                         }
                     }
                 }
-                for (var i = 0; i < keys.length; i++) {
+                for (let i = 0; i < keys.length; i++) {
                     this._store.removeItem(keys[i]);
                 }
             }
             catch (e) {
                 this.logError(e);
             }
-        };
-        serviceBusBase.prototype.listen = function (event) {
+        }
+        listen(event) {
             try {
-                for (var prop in this._listeningForList) {
+                for (let prop in this._listeningForList) {
                     if (this._listeningForList.hasOwnProperty(prop)) {
-                        var eventName = this._listeningForList[prop].key;
-                        var callback = this._listeningForList[prop].callback;
+                        const eventName = this._listeningForList[prop].key;
+                        const callback = this._listeningForList[prop].callback;
                         if (event.key === eventName) {
-                            var json = event.newValue;
+                            const json = event.newValue;
                             if (typeof json != "undefined" && json != null && json !== "") {
-                                var eventTypeCollection = JSON.parse(json);
-                                for (var ii = 0; ii < eventTypeCollection.length; ii++) {
-                                    var eventStamp = eventTypeCollection[ii].eventTimeStamp;
+                                const eventTypeCollection = JSON.parse(json);
+                                for (let ii = 0; ii < eventTypeCollection.length; ii++) {
+                                    const eventStamp = eventTypeCollection[ii].eventTimeStamp;
                                     if (this._heardEvents.indexOf(eventStamp) > -1) {
                                         continue;
                                     }
-                                    var args = eventTypeCollection[ii].data;
+                                    const args = eventTypeCollection[ii].data;
                                     if (typeof callback != "undefined" && callback != null) {
                                         callback(args);
                                     }
@@ -138,26 +134,26 @@ var tbob;
             catch (e) {
                 this.logError(e);
             }
-        };
-        serviceBusBase.prototype.storageCleanup = function (key) {
+        }
+        storageCleanup(key) {
             try {
-                var json = this._store.getItem(key);
+                const json = this._store.getItem(key);
                 if (typeof json != "undefined" && json != null) {
-                    var eventTypeCollection = JSON.parse(json);
-                    var indexesToRemove = [];
-                    for (var i = 0; i < eventTypeCollection.length; i++) {
+                    const eventTypeCollection = JSON.parse(json);
+                    const indexesToRemove = [];
+                    for (let i = 0; i < eventTypeCollection.length; i++) {
                         if (this.timestamp() - eventTypeCollection[i].eventTimeStamp > this._cleanupDelay) {
                             indexesToRemove.push(i);
                         }
                     }
-                    for (var ii = 0; ii < indexesToRemove.length; ii++) {
+                    for (let ii = 0; ii < indexesToRemove.length; ii++) {
                         eventTypeCollection.splice(ii, 1);
                     }
                     if (eventTypeCollection.length === 0) {
                         this._store.removeItem(key);
                     }
                     else {
-                        var eventTypeCollectionJson = JSON.stringify(eventTypeCollection);
+                        const eventTypeCollectionJson = JSON.stringify(eventTypeCollection);
                         this._store.setItem(key, eventTypeCollectionJson);
                     }
                 }
@@ -165,28 +161,27 @@ var tbob;
             catch (e) {
                 this.logError(e);
             }
-        };
-        serviceBusBase.prototype.getKeyForEventName = function (eventName) {
+        }
+        getKeyForEventName(eventName) {
             return this._serviceBusPrefix + eventName;
-        };
-        serviceBusBase.prototype.timestamp = function () {
+        }
+        timestamp() {
             return +new Date();
-        };
-        serviceBusBase.prototype.newGuid = function () {
-            return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+        }
+        newGuid() {
+            return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, c => {
                 var r = Math.random() * 16 | 0, v = c == "x" ? r : (r & 0x3 | 0x8);
                 return v.toString(16);
             });
-        };
-        serviceBusBase.prototype.logError = function (e) {
+        }
+        logError(e) {
             if (window.console && window.console.log && e != null && e.message) {
                 console.log(e.message);
                 if (this.handleException != null) {
                     this.handleException(e);
                 }
             }
-        };
-        return serviceBusBase;
-    }());
+        }
+    }
 })(tbob || (tbob = {}));
 //# sourceMappingURL=2browsers1bus.js.map
