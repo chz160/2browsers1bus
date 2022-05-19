@@ -1,4 +1,4 @@
-declare module tbob {
+export declare namespace tbob {
     export class serviceBus {
         private static instance;
         static getInstance(): serviceBusBase;

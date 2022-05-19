@@ -1,6 +1,6 @@
 {
     "name": "2browsers1bus",
-    "version": "1.0.2",
+    "version": "1.0.3",
     "description": "2browser1bus (TBOB) is a service bus for communicating between browser windows using the localStorage feature of modern browsers.",
     "homepage": "https://github.com/chz160/2browsers1bus",
     "author": "Noah Porch <noahporch@gmail.com> (https://github.com/chz160)",

@@ -1,4 +1,4 @@
-module tbob {
+export namespace tbob {
     export class serviceBus {
         private static instance: serviceBusBase;
         static getInstance(): serviceBusBase {

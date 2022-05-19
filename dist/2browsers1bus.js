@@ -1,3 +1,6 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.tbob = void 0;
 var tbob;
 (function (tbob) {
     class serviceBus {
@@ -183,5 +186,5 @@ var tbob;
             }
         }
     }
-})(tbob || (tbob = {}));
+})(tbob = exports.tbob || (exports.tbob = {}));
 //# sourceMappingURL=2browsers1bus.js.map
